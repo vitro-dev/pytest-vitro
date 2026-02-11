@@ -1,8 +1,8 @@
-"""Unit tests for utils module in pytest-boardfarm."""
+"""Unit tests for utils module in pytest-vitro."""
 
 import pytest
 
-from pytest_boardfarm3.lib.utils import is_env_matching
+from pytest_vitro.lib.utils import is_env_matching
 
 env_boot_file = {
     "environment_def": {
@@ -31,13 +31,14 @@ env_boot_file = {
 def test_contains_check(
     contains_check: str,
     contains_check_value: str,
+    *,
     expected: bool,
 ) -> None:
     """Unit tests with positive and negative scenarios for `contains_` check.
 
     :param contains_check: contains_check name, for ex: contains_exact
     :type contains_check: str
-    :param contains_check_value: value to be checked against boardfarm env
+    :param contains_check_value: value to be checked against vitro env
     :type contains_check_value: str
     :param expected: expected value from running the tests
     :type expected: bool
@@ -168,6 +169,7 @@ def test_unknown_contains_check(
 )
 def test_contains_check_combinations(
     contains_check_list: list[dict[str, str]],
+    *,
     expected: bool,
 ) -> None:
     """Tests with positive and negative scenarios for combinations of `contains_` check.

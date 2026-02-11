@@ -1,15 +1,18 @@
 """Wrapper to pytest argument parser."""
 
-from typing import Any
+from __future__ import annotations
 
-from _pytest.config.argparsing import OptionGroup, Parser
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from _pytest.config.argparsing import OptionGroup, Parser
 
 
 # pylint: disable-next=too-few-public-methods
 class _OptionGroup:
     """Argument parser option group."""
 
-    def __init__(self, group: OptionGroup):
+    def __init__(self, group: OptionGroup) -> None:
         """Initialize option group.
 
         :param group: argument group
@@ -32,8 +35,8 @@ class ArgumentParser:
     """Wrapper to pytest argument parser.
 
     Pytest is using a different method to add command line arguments.
-    Boardfarm is using the standard argparser library. This wrapper
-    converts boardfarm add arguments to pytest add argument way.
+    vitro is using the standard argparser library. This wrapper
+    converts vitro add arguments to pytest add argument way.
     """
 
     def __init__(self, parser: Parser) -> None:
@@ -43,7 +46,7 @@ class ArgumentParser:
         :type parser: Parser
         """
         self._parser = parser
-        self._group = parser.getgroup("boardfarm", "boardfarm")
+        self._group = parser.getgroup("vitro", "vitro")
 
     def add_argument_group(  # pylint: disable-next=unused-argument
         self,
@@ -62,7 +65,7 @@ class ArgumentParser:
         :return: argument group instance
         :rtype: _OptionGroup
         """
-        group_name = f"boardfarm-{name}"
+        group_name = f"vitro-{name}"
         group = self._parser.getgroup(group_name, group_name)
         return _OptionGroup(group)
 

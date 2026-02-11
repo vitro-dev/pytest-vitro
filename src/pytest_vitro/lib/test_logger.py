@@ -1,5 +1,7 @@
 """Log wrapper module."""
 
+from __future__ import annotations
+
 import logging
 import os
 
@@ -18,9 +20,9 @@ class TestLogger:  # pylint: disable=too-few-public-methods
 
         :param message: Log message
         """
-        testname = (
-            (os.environ.get("PYTEST_CURRENT_TEST").split(" (setup)")[0])
-            .split("::")[1]
-            .replace(" ", "_")
-        )
+        _current_test = os.environ.get("PYTEST_CURRENT_TEST")
+        if _current_test is None:
+            msg = "PYTEST_CURRENT_TEST environment variable is not set."
+            raise RuntimeError(msg)
+        testname = (_current_test.split(" (setup)")[0]).split("::")[1].replace(" ", "_")
         self._logger.info("[*****LOGGING-STEP*****][%s][%s]", testname, message)

@@ -1,57 +1,62 @@
-"""Lint and test pytest-boardfarm on multiple python environments."""
+"""Lint and test pytest-vitro on multiple python environments."""
 
 import nox
 
-_PYTHON_VERSIONS = ["3.11"]
+_PYTHON_VERSIONS = (
+    "3.10",
+    "3.11",
+    "3.12",
+    "3.13",
+    "3.14",
+    "3.14t",
+)
 
-# Fail nox session when run a program which
-# is not installed in its virtualenv
+# Fail nox session when run a program which is not installed in its virtualenv
 nox.options.error_on_external_run = True
+
+# use uv to speed up the dependencies installation
+nox.options.default_venv_backend = "uv"
+
+
+def _install_deps(session: nox.Session) -> None:
+    session.run_install(
+        "uv",
+        "sync",
+        "-q",
+        "--frozen",
+        f"--python={session.virtualenv.location}",
+        env={"UV_PROJECT_ENVIRONMENT": session.virtualenv.location},
+    )
 
 
 @nox.session(python=_PYTHON_VERSIONS)
 def lint(session: nox.Session) -> None:
-    """Lint pytest-boardfarm.
-
-    # noqa: DAR101
-    """
-    session.install("--upgrade", "--pre", "boardfarm3")
-    session.install("--upgrade", ".[dev]")
+    """Lint pytest-vitro."""
+    _install_deps(session=session)
     session.run("ruff", "format", "--check", ".")
     session.run("ruff", "check", ".")
-    session.run("mypy", "pytest_boardfarm3")
-    session.run("darglint2", "-s", "sphinx", "-x", "pytest_boardfarm3")
+    session.run("mypy", "./src/", "./tests/")
 
 
 @nox.session(python=_PYTHON_VERSIONS)
 def pylint(session: nox.Session) -> None:
-    """Lint pytest-boardfarm using pylint without dev dependencies.
-
-    # noqa: DAR101
-    """
-    session.install("--upgrade", "--pre", "boardfarm3")
-    session.install("--upgrade", ".", "pylint")
-    session.run("pylint", "pytest_boardfarm3")
+    """Lint pytest-vitro using pylint without dev dependencies."""
+    _install_deps(session=session)
+    session.run("pylint", "pytest_vitro")
 
 
 @nox.session(python=_PYTHON_VERSIONS)
 def test(session: nox.Session) -> None:
-    """Test pytest-boardfarm.
-
-    # noqa: DAR101
-    """
-    session.install("--upgrade", "--pre", "boardfarm3")
-    session.install("--upgrade", ".[test]")
-    session.run("pytest", "unittests")
+    """Test pytest-vitro."""
+    _install_deps(session=session)
+    session.run("pytest", "tests")
 
 
 @nox.session(python=_PYTHON_VERSIONS)
-def boardfarm_help(session: nox.Session) -> None:
-    """Execute boardfarm --help.
+def vitro_help(session: nox.Session) -> None:
+    """Execute vitro --help.
 
     This helps identifying integration issues with the plugins/devices.
-    # noqa: DAR101
     """
-    session.install("--upgrade", "--pre", "boardfarm3")
-    session.install("--upgrade", "-e", ".")
-    session.run("boardfarm", "--help")
+    _install_deps(session)
+    session.run("vitro", "--help")

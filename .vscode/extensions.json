@@ -1,22 +1,10 @@
 {
     "recommendations": [
-        "ms-python.python",
-        "ms-python.mypy-type-checker",
-        "ms-python.vscode-pylance",
-        "ms-python.pylint",
-        "ms-python.flake8",
-        "charliermarsh.ruff",
+        "alefragnani.bookmarks",
         "njpwerner.autodocstring",
-        "VisualStudioExptTeam.vscodeintellicode",
-        "VisualStudioExptTeam.intellicode-api-usage-examples",
-        "tamasfe.evenBetterToml",
-        "DavidAnson.vscode-markdownlint",
-        "trond-snekvik.simple-rst",
-        "wayou.vscode-todo-highlight",
-        "vscode-icons-team.vscode-icons"
-    ],
-    "unwantedRecommendations": [
-        "ms-python.black-formatter",
-        "ms-python.isort"
+        "tamasfe.even-better-toml",
+        "ms-python.mypy-type-checker",
+        "ms-python.python",
+        "charliermarsh.ruff"
     ]
 }

@@ -2,27 +2,21 @@
     "[python]": {
         "editor.codeActionsOnSave": {
             "source.fixAll": "explicit",
-            "source.organizeImports": "always"
+            "source.organizeImports": "explicit"
         },
         "editor.defaultFormatter": "charliermarsh.ruff",
         "editor.formatOnSave": true
     },
-    "autoDocstring.docstringFormat": "sphinx",
     "editor.rulers": [
-        36,
         78,
         80,
         88
     ],
-    "editor.suggestSelection": "first",
-    "evenBetterToml.formatter.allowedBlankLines": 1,
-    "evenBetterToml.formatter.columnWidth": 80,
-    "python.languageServer": "Pylance",
-    "python.terminal.activateEnvInCurrentTerminal": true,
+    "mypy-type-checker.importStrategy": "fromEnvironment",
+    "pylint.importStrategy": "fromEnvironment",
+    "python.testing.pytestArgs": [
+        "tests"
+    ],
     "python.testing.pytestEnabled": true,
-    "ruff.fixAll": false,
-    "ruff.importStrategy": "fromEnvironment",
-    "ruff.lint.run": "onSave",
-    "ruff.organizeImports": true,
-    "workbench.editor.enablePreview": false
+    "python.testing.unittestEnabled": false
 }

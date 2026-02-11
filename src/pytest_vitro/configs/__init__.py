@@ -1,4 +1,6 @@
-"""Pytest boardfarm configs package."""
+"""Pytest vitro configs package."""
+
+from __future__ import annotations
 
 import json
 from pathlib import Path

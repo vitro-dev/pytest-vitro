@@ -1,13 +1,17 @@
-"""pytest plugin for boardfarm."""
+"""pytest plugin for vitro."""
+
+from __future__ import annotations
 
 import sys
+from typing import TYPE_CHECKING
 
-from _pytest.config.argparsing import Parser
-from _pytest.nodes import Item
-from pytest import Config  # noqa: PT013
+from pytest_vitro import vitro_fixtures
+from pytest_vitro.vitro_plugin import PALCO_PLUGIN_NAME, VitroPlugin
 
-from pytest_boardfarm3 import boardfarm_fixtures
-from pytest_boardfarm3.boardfarm_plugin import BOARDFARM_PLUGIN_NAME, BoardfarmPlugin
+if TYPE_CHECKING:
+    from _pytest.config.argparsing import Parser
+    from _pytest.nodes import Item
+    from pytest import Config  # noqa: PT013
 
 sys.setrecursionlimit(3000)
 
@@ -30,16 +34,16 @@ def pytest_addoption(parser: Parser) -> None:
 
 
 def pytest_load_initial_conftests(early_config: Config, args: list[str]) -> None:
-    """Register boardfarm plugin to pytest based on command line arguments.
+    """Register vitro plugin to pytest based on command line arguments.
 
     :param early_config: pytest config
     :type early_config: Config
     :param args: command line arguments
     :type args: list[str]
     """
-    early_config.pluginmanager.register(boardfarm_fixtures)
+    early_config.pluginmanager.register(vitro_fixtures)
     if any(x for x in args if (x in ("--help", "-h") or x.startswith("--board"))):
-        early_config.pluginmanager.register(BoardfarmPlugin(), BOARDFARM_PLUGIN_NAME)
+        early_config.pluginmanager.register(VitroPlugin(), PALCO_PLUGIN_NAME)
 
 
 def pytest_collection_modifyitems(config: Config, items: list[Item]) -> None:

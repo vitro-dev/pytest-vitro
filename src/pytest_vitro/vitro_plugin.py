@@ -1,4 +1,4 @@
-"""pytest boardfarm plugin module."""
+"""pytest vitro plugin module."""
 
 from __future__ import annotations
 
@@ -8,44 +8,55 @@ from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
 import pytest
-from boardfarm3.lib.boardfarm_config import (
-    BoardfarmConfig,
-    get_json,
-)
-from boardfarm3.lib.device_manager import DeviceManager, get_device_manager
-from boardfarm3.main import get_plugin_manager
 from pytest import Config, Item, Parser, Session, TestReport  # noqa: PT013
+from vitro.libraries.device_manager import DeviceManager, get_device_manager
+from vitro.libraries.vitro_config import VitroConfig, get_json
+from vitro.main import get_plugin_manager
 
-from pytest_boardfarm3.configs import LOGGING_CONFIG
-from pytest_boardfarm3.lib.argument_parser import ArgumentParser
-from pytest_boardfarm3.lib.html_report import get_boardfarm_html_table_report
-from pytest_boardfarm3.lib.utils import capture_boardfarm_logs, is_env_matching
+from pytest_vitro.configs import LOGGING_CONFIG
+from pytest_vitro.lib.argument_parser import ArgumentParser
+from pytest_vitro.lib.html_report import get_vitro_html_table_report
+from pytest_vitro.lib.utils import capture_vitro_logs, is_env_matching
 
 if TYPE_CHECKING:
     from collections.abc import Generator
 
-    from _pytest.logging import LoggingPlugin
 
-
-BOARDFARM_PLUGIN_NAME = "_boardfarm"
+PALCO_PLUGIN_NAME = "_vitro"
 
 THIS_TZ = datetime.now(timezone.utc).astimezone().tzinfo
 
 
-class BoardfarmPlugin:
-    """Pytest boardfarm plugin."""
+class VitroPlugin:
+    """Pytest vitro plugin."""
 
     # pylint: disable=no-member  # hook calls are not a member
 
     def __init__(self) -> None:
-        """Initialize boardfarm plugin."""
-        self._session_config: Config = None
-        self._test_start_time: datetime = None
+        """Initialize vitro plugin."""
+        self._session_config: Config | None = None
+        self._test_start_time: datetime | None = None
         self._deployment_setup_data: dict = {}
         self._deployment_teardown_data: dict = {}
         self._plugin_manager = get_plugin_manager()
-        self.device_manager: DeviceManager = None
-        self.boardfarm_config: BoardfarmConfig = None
+        self.device_manager: DeviceManager | None = None
+        self._vitro_config: VitroConfig | None = None
+
+    @property
+    def session_config(self) -> Config:
+        """Raise Exception in case session config is not set, else return it."""
+        if self._session_config is None:
+            msg = "Session config is not set yet."
+            raise ValueError(msg)
+        return self._session_config
+
+    @property
+    def vitro_config(self) -> VitroConfig:
+        """Raise Exception in case vitro config is not set, else return it."""
+        if self._vitro_config is None:
+            msg = "vitro config is not set yet."
+            raise ValueError(msg)
+        return self._vitro_config
 
     def pytest_addoption(self, parser: Parser) -> None:
         """Add command line arguments to pytest.
@@ -53,39 +64,42 @@ class BoardfarmPlugin:
         :param parser: argument parser
         :type parser: Parser
         """
-        self._plugin_manager.hook.boardfarm_add_cmdline_args(
+        self._plugin_manager.hook.vitro_add_cmdline_args(
             argparser=ArgumentParser(parser),
         )
 
-    def deploy_boardfarm_devices(self) -> None:
-        """Deploy boardfarm devices to the environment."""
-        self.device_manager = self._plugin_manager.hook.boardfarm_register_devices(
-            config=self.boardfarm_config,
-            cmdline_args=self._session_config.option,
+    def deploy_vitro_devices(self) -> None:
+        """Deploy vitro devices to the environment."""
+        self.device_manager = self._plugin_manager.hook.vitro_register_devices(
+            config=self._vitro_config,
+            cmdline_args=self.session_config.option,
             plugin_manager=self._plugin_manager,
         )
         asyncio.run(
-            self._plugin_manager.hook.boardfarm_setup_env(
-                config=self.boardfarm_config,
-                cmdline_args=self._session_config.option,
+            self._plugin_manager.hook.vitro_setup_env(
+                config=self._vitro_config,
+                cmdline_args=self.session_config.option,
                 plugin_manager=self._plugin_manager,
                 device_manager=self.device_manager,
             ),
         )
 
-    def release_boardfarm_devices(self) -> None:
-        """Release boardfarm devices after the test execution."""
-        deployment_status = (
-            {"status": "success"}
-            if "exception" not in self._deployment_setup_data
-            else {
-                "status": "failed",
-                "exception": self._deployment_setup_data.get("exception")[1],
-            }
-        )
-        self._plugin_manager.hook.boardfarm_release_devices(
-            config=self.boardfarm_config,
-            cmdline_args=self._session_config.option,
+    def release_vitro_devices(self) -> None:
+        """Release vitro devices after the test execution."""
+        if "exception" not in self._deployment_setup_data:
+            deployment_status = {"status": "success"}
+        else:
+            exception_info = self._deployment_setup_data.get("exception")
+            if exception_info is not None:
+                deployment_status = {
+                    "status": "failed",
+                    "exception": exception_info[1],
+                }
+            else:
+                deployment_status = {"status": "failed", "exception": "Unknown error"}
+        self._plugin_manager.hook.vitro_release_devices(
+            config=self._vitro_config,
+            cmdline_args=self.session_config.option,
             plugin_manager=self._plugin_manager,
             deployment_status=deployment_status,
             device_manager=self.device_manager,
@@ -100,16 +114,16 @@ class BoardfarmPlugin:
         """
         yield
         self._session_config = session.config
-        self._plugin_manager.hook.boardfarm_configure(
+        self._plugin_manager.hook.vitro_configure(
             cmdline_args=self._session_config.option,
             plugin_manager=self._plugin_manager,
         )
-        inventory_config = self._plugin_manager.hook.boardfarm_reserve_devices(
+        inventory_config = self._plugin_manager.hook.vitro_reserve_devices(
             cmdline_args=self._session_config.option,
             plugin_manager=self._plugin_manager,
         )
 
-        self.boardfarm_config = self._plugin_manager.hook.boardfarm_parse_config(
+        self._vitro_config = self._plugin_manager.hook.vitro_parse_config(
             cmdline_args=self._session_config.option,
             inventory_config=inventory_config,
             env_config=get_json(self._session_config.option.env_config),
@@ -129,16 +143,19 @@ class BoardfarmPlugin:
         :param session: pytest session instance
         :type session: Session
         """
-        logging_plugin: LoggingPlugin = session.config.pluginmanager.get_plugin(
-            "logging-plugin",
+        logging_plugin = session.config.pluginmanager.get_plugin(
+            "logging-plugin",  # type:ignore[assignment]
         )
+        if logging_plugin is None:
+            msg = "Logging plugin is not available."
+            raise RuntimeError(msg)
         device_manager = self._get_device_manager()
         try:
             if device_manager is None:
-                logging_plugin.log_cli_handler.set_when("boardfarm setup")
-                capture_boardfarm_logs(
+                logging_plugin.log_cli_handler.set_when("vitro setup")
+                capture_vitro_logs(
                     logging_plugin,
-                    self.deploy_boardfarm_devices,
+                    self.deploy_vitro_devices,
                     capture_to=self._deployment_setup_data,
                 )
             else:
@@ -146,10 +163,10 @@ class BoardfarmPlugin:
             yield
         finally:
             if device_manager is None:
-                logging_plugin.log_cli_handler.set_when("boardfarm teardown")
-                capture_boardfarm_logs(
+                logging_plugin.log_cli_handler.set_when("vitro teardown")
+                capture_vitro_logs(
                     logging_plugin,
-                    self.release_boardfarm_devices,
+                    self.release_vitro_devices,
                     capture_to=self._deployment_teardown_data,
                 )
 
@@ -182,7 +199,7 @@ class BoardfarmPlugin:
             and env_req_marker.args
             and not is_env_matching(
                 env_req_marker.args[0],
-                self.boardfarm_config.env_config,
+                self.vitro_config.env_config,
             )
         ):
             pytest.skip("Environment mismatch. Skipping")
@@ -258,20 +275,20 @@ class BoardfarmPlugin:
 
     @pytest.hookimpl(optionalhook=True)
     def pytest_html_results_summary(self, postfix: list[str]) -> None:
-        """Update the html report with boardfarm deployment and environment details.
+        """Update the html report with vitro deployment and environment details.
 
         :param postfix: html report postfix content list
         :type postfix: list[str]
         """
         postfix.extend(
             [
-                "<h3>Boardfarm</h3>",
-                get_boardfarm_html_table_report(
-                    self._session_config,
-                    self.device_manager,
-                    self.boardfarm_config,
-                    self._deployment_setup_data,
-                    self._deployment_teardown_data,
+                "<h3>vitro</h3>",
+                get_vitro_html_table_report(
+                    session_config=self.session_config,
+                    device_manager=self.device_manager,
+                    vitro_config=self.vitro_config,
+                    deployment_setup_data=self._deployment_setup_data,
+                    deployment_teardown_data=self._deployment_teardown_data,
                 ),
                 "<br>",
             ],
