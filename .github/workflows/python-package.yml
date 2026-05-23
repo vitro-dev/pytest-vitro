@@ -1,0 +1,30 @@
+# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+
+name: Verify this Python package.
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    name: Check the package
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+
+      - name: Install CI dependencies
+        run: uv sync --locked --only-group ci
+
+      - name: Execute checks with pre-commit
+        run: uv run pre-commit run --all-files
+
+      - name: Execute checks with nox (against multiple Python versions)
+        run: uv run nox
