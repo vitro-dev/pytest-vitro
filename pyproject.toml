@@ -4,6 +4,9 @@
 
 [tool.setuptools_scm]
     version_scheme = "no-guess-dev"
+    # Fail on dirty trees and strip local version — recommended for release CI
+    # TODO: move to no-local-version-strict once released
+    local_scheme = "no-local-version"
 
 
 [project]
