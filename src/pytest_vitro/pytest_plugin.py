@@ -6,7 +6,7 @@ import sys
 from typing import TYPE_CHECKING
 
 from pytest_vitro import vitro_fixtures
-from pytest_vitro.vitro_plugin import PALCO_PLUGIN_NAME, VitroPlugin
+from pytest_vitro.vitro_plugin import VITRO_PLUGIN_NAME, VitroPlugin
 
 if TYPE_CHECKING:
     from _pytest.config.argparsing import Parser
@@ -43,7 +43,7 @@ def pytest_load_initial_conftests(early_config: Config, args: list[str]) -> None
     """
     early_config.pluginmanager.register(vitro_fixtures)
     if any(x for x in args if (x in ("--help", "-h") or x.startswith("--board"))):
-        early_config.pluginmanager.register(VitroPlugin(), PALCO_PLUGIN_NAME)
+        early_config.pluginmanager.register(VitroPlugin(), VITRO_PLUGIN_NAME)
 
 
 def pytest_collection_modifyitems(config: Config, items: list[Item]) -> None:
