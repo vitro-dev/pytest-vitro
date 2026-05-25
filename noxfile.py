@@ -45,11 +45,27 @@ def pylint(session: nox.Session) -> None:
     session.run("pylint", "pytest_vitro")
 
 
-@nox.session(python=_PYTHON_VERSIONS)
+@nox.session
+def coverage_clean(session: nox.Session) -> None:
+    """Clean coverage data."""
+    _install_deps(session=session)
+    session.run("coverage", "erase")
+
+
+@nox.session(python=_PYTHON_VERSIONS, requires=["coverage_clean"])
 def test(session: nox.Session) -> None:
     """Test pytest-vitro."""
     _install_deps(session=session)
-    session.run("pytest", "tests")
+    session.run("coverage", "run", "-m", "pytest", "tests")
+
+    session.notify("coverage_collate")
+
+
+@nox.session
+def coverage_collate(session: nox.Session) -> None:
+    """Collate coverage data from all sessions."""
+    _install_deps(session=session)
+    session.run("coverage", "html")
 
 
 @nox.session(python=_PYTHON_VERSIONS)
