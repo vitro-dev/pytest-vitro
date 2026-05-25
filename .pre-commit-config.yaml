@@ -5,26 +5,42 @@ repos:
     rev: v6.0.0
     hooks:
     -   id: trailing-whitespace
+        stages: [pre-commit]
     -   id: end-of-file-fixer
+        stages: [pre-commit]
     -   id: check-yaml
+        stages: [pre-commit]
     -   id: check-added-large-files
+        stages: [pre-commit]
     -   id: check-ast
+        stages: [pre-commit]
     -   id: end-of-file-fixer
+        stages: [pre-commit]
     -   id: mixed-line-ending
+        stages: [pre-commit]
     -   id: trailing-whitespace
+        stages: [pre-commit]
     -   id: check-docstring-first
+        stages: [pre-commit]
     -   id: check-yaml
+        stages: [pre-commit]
     -   id: check-json
+        stages: [pre-commit]
     -   id: pretty-format-json
         args: [--autofix, --indent=4, --no-ensure-ascii]
+        stages: [pre-commit]
     -   id: check-added-large-files
+        stages: [pre-commit]
     -   id: requirements-txt-fixer
+        stages: [pre-commit]
     -   id: check-merge-conflict
+        stages: [pre-commit]
     -   id: debug-statements
+        stages: [pre-commit]
     -   id: check-executables-have-shebangs
         language: python
         files: \.py$
-
+        stages: [pre-commit]
 -   repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.15.0
     hooks:
@@ -32,5 +48,15 @@ repos:
         # https://docs.astral.sh/ruff/formatter/#sorting-imports
         args: [check, --select, I, --fix]
         name: ruff-isort
+        stages: [pre-commit]
     -   id: ruff-format
+        stages: [pre-commit]
     -   id: ruff-check
+        stages: [pre-commit]
+-   repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.11.16
+    hooks:
+    -   id: uv-lock
+        stages: [pre-commit]
+    -   id: uv-sync
+        stages: [post-checkout]
