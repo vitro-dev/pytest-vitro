@@ -53,6 +53,8 @@ jobs:
 
   publish-to-testpypi:
     name: Publish Python 🐍 distribution 📦 to TestPyPI
+    # only publish to TestPyPI on changes to the main branch
+    if: startsWith(github.ref, 'refs/heads/main')
     needs:
     - build
     runs-on: ubuntu-latest
