@@ -93,7 +93,7 @@ The plugin exposes several fixtures aimed at easing device interaction, configur
         vt_logger.step("Connect to DUT")
     ```
 
-- `vitro_config` (session): Returns the resolved `vitroConfig` that the plugin created by merging inventory, env files and CLI overrides. Use this to inspect provisioning mode and environment definitions.
+- `vitro_config` (session): Returns the resolved `VitroConfig` that the plugin created by merging inventory, env files and CLI overrides. Use this to inspect provisioning mode and environment definitions.
 
     ```python
     def test_config(vitro_config):
@@ -152,7 +152,7 @@ pytest -s \
     ./tests/
 ```
 
-- The pytest-vitro plugin reads the --env-config and --inventory-config options and uses them to build a `vitroConfig` and a `DeviceManager`.
+- The pytest-vitro plugin reads the --env-config and --inventory-config options and uses them to build a `VitroConfig` and a `DeviceManager`.
 - Unless you pass `--skip-boot`, the plugin will call vitro pluggy hooks to reserve, boot and configure services and devices before tests run.
 - During tests, fixtures like `device_manager` and `vitro_config` become available for use cases and tests.
 - After the run, vitro plugin will run device teardown and release hooks, and store the collected logs/reports in `./results` directory.
@@ -192,7 +192,7 @@ High-level lifecycle the plugin implements:
 1. `pytest` starts and early fixtures are registered.
 2. When `VitroPlugin` is active it adds vitro CLI args and, on session start:
    - Calls the `vitro_reserve_devices` hook to reserve lab hardware or otherwise prepare inventory.
-   - Calls the `vitro_parse_config` hook to merge inventory, env JSON and CLI overrides into a `vitroConfig`.
+   - Calls the `vitro_parse_config` hook to merge inventory, env JSON and CLI overrides into a `VitroConfig`.
 3. During the test run the plugin:
    - Registers and instantiates device classes via `vitro_register_devices`.
    - Calls `vitro_setup_env` (async-capable) which triggers device-level hooks to boot and configure servers, devices and attached clients in the documented order.
