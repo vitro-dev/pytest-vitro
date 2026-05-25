@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     from collections.abc import Generator
 
 
-PALCO_PLUGIN_NAME = "_vitro"
+VITRO_PLUGIN_NAME = "_vitro"
 
 THIS_TZ = datetime.now(timezone.utc).astimezone().tzinfo
 

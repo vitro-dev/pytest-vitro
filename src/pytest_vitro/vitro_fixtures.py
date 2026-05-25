@@ -11,7 +11,7 @@ from vitro.devices.base_devices import VitroDevice
 from pytest_vitro.exceptions import VitroPluginError
 from pytest_vitro.lib.test_logger import TestLogger
 from pytest_vitro.lib.utils import ContextStorage
-from pytest_vitro.vitro_plugin import PALCO_PLUGIN_NAME, VitroPlugin
+from pytest_vitro.vitro_plugin import VITRO_PLUGIN_NAME, VitroPlugin
 
 if TYPE_CHECKING:
     from _pytest.config import Config
@@ -48,7 +48,7 @@ def get_vitro_plugin(pytestconfig: Config) -> VitroPlugin:
     :return: vitro plugin instance
     :rtype: VitroPlugin
     """
-    plugin = pytestconfig.pluginmanager.get_plugin(PALCO_PLUGIN_NAME)
+    plugin = pytestconfig.pluginmanager.get_plugin(VITRO_PLUGIN_NAME)
     if plugin is None:
         err_msg = "vitro plugin is not registered."
         raise VitroPluginError(err_msg)
